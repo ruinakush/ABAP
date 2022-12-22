@@ -1,0 +1,62 @@
+*&---------------------------------------------------------------------*
+*& Report  ZMMRP817
+*&
+*&---------------------------------------------------------------------*
+*& Compras impuesto al plástico
+*&
+*&---------------------------------------------------------------------*
+REPORT zmmrp817.
+
+INCLUDE zalv.
+INCLUDE zmmri817_top.
+INCLUDE zmmri817_src.
+INCLUDE zmmri817_cls.
+INCLUDE zmmri817_frm.
+
+
+*----------------------------------------------------------------------
+* INITIALIZATION.
+*----------------------------------------------------------------------
+INITIALIZATION.
+
+  PERFORM add_boton.
+  "Movimientos 101 y 102 por defecto
+  s_bwart-sign = 'I'.
+  s_bwart-option = 'EQ'.
+  s_bwart-low = '101'.
+  APPEND s_bwart.
+  s_bwart-low = '102'.
+  APPEND s_bwart.
+
+
+*--------------------------------------------------------------------*
+* AT SELECTION-SCREEN
+*--------------------------------------------------------------------*
+AT SELECTION-SCREEN.
+
+  IF sy-ucomm EQ 'FC01'.
+    CALL TRANSACTION 'ZMMBD799'.
+  ENDIF.
+
+
+*----------------------------------------------------------------------
+* START-OF-SELECTION.
+*----------------------------------------------------------------------
+START-OF-SELECTION.
+
+  PERFORM busqueda_datos.
+
+  PERFORM comprobacion_bd800.
+
+  SORT gt_alv BY budat_mkpf.
+
+*----------------------------------------------------------------------
+* END-OF-SELECTION.
+*----------------------------------------------------------------------
+END-OF-SELECTION.
+  DESCRIBE TABLE gt_alv LINES lt_lines.
+  IF lt_lines > 0.
+    PERFORM salida_alv.
+  ELSE.
+    MESSAGE text-e01 TYPE gc_s.
+  ENDIF.
